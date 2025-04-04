@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-Quantitative Finance Attribution Analysis (QuantFAA) is a Python library designed to help portfolio managers, quant researchers, and risk analysts explain performance vs. benchmarks using Brinson, factor, and risk attribution. It includes support for Fama-French models, transaction cost analysis, and risk metrics like VaR, Tail Ratio, and more — with modular, testable design and real-world application support.
+Quantitative Finance Attribution Analysis (QuantFAA) is a Python library designed to help portfolio managers, quant researchers, and risk analysts explain performance vs. benchmarks using Brinson, factor, and risk attribution. It includes support for Fama-French models, transaction cost analysis, and risk metrics like VaR, Tail Ratio, and more, with modular, testable design and real-world application support.
 
 #
 A comprehensive Python library for performance attribution analysis in quantitative finance, supporting multiple attribution methods, factor models, and risk metrics. This library helps portfolio managers, quantitative analysts, and researchers understand the sources of portfolio returns and risks.
