@@ -34,7 +34,7 @@ A comprehensive Python library for performance attribution analysis in quantitat
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/quant-finance-projects.git
+git clone https://github.com/diaabraham/Quantitative-Finance-Attribution-Analysis.git
 cd quant-finance-projects
 ```
 
