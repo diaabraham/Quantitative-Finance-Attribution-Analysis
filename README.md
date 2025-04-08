@@ -432,6 +432,164 @@ print("\nStyle-Based Attribution:")
 print(style_results)
 ```
 
+### Visualization and Formatted Output Examples
+
+1. **Factor Contributions Bar Chart**
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def plot_factor_contributions(contributions: pd.DataFrame):
+    """
+    Plot factor contributions as a bar chart.
+    
+    Args:
+        contributions: DataFrame of factor contributions
+    """
+    plt.figure(figsize=(12, 6))
+    sns.set_style("whitegrid")
+    
+    # Convert to percentage and sort
+    contributions_pct = contributions * 100
+    contributions_pct = contributions_pct.sort_values(ascending=True)
+    
+    # Create bar plot
+    ax = contributions_pct.plot(kind='barh', color='skyblue')
+    
+    # Add value labels
+    for i, v in enumerate(contributions_pct):
+        ax.text(v, i, f'{v:.2f}%', va='center')
+    
+    # Customize plot
+    plt.title('Factor Contributions to Portfolio Returns', pad=20)
+    plt.xlabel('Contribution (%)')
+    plt.ylabel('Factor')
+    plt.tight_layout()
+    
+    return plt
+
+# Example usage
+contributions = model.calculate_contributions().sum()  # Sum over time
+plot = plot_factor_contributions(contributions)
+plot.show()
+
+# Example output:
+# [Bar chart showing factor contributions]
+# market: 0.80%
+# size: -0.20%
+# value: 0.15%
+# momentum: 0.10%
+# quality: 0.05%
+```
+
+2. **Brinson Attribution Table**
+```python
+from tabulate import tabulate
+
+def format_brinson_table(results: dict) -> str:
+    """
+    Format Brinson attribution results as a table.
+    
+    Args:
+        results: Dictionary of attribution results
+        
+    Returns:
+        Formatted table string
+    """
+    # Prepare data
+    sectors = list(results['allocation'].keys())[:-1]  # Exclude 'Total'
+    data = []
+    
+    for sector in sectors:
+        row = [
+            sector,
+            f"{results['allocation'][sector]:.2%}",
+            f"{results['selection'][sector]:.2%}",
+            f"{results['interaction'][sector]:.2%}",
+            f"{results['allocation'][sector] + results['selection'][sector] + results['interaction'][sector]:.2%}"
+        ]
+        data.append(row)
+    
+    # Add total row
+    data.append([
+        'Total',
+        f"{results['allocation']['Total']:.2%}",
+        f"{results['selection']['Total']:.2%}",
+        f"{results['interaction']['Total']:.2%}",
+        f"{results['total_effect']:.2%}"
+    ])
+    
+    # Create table
+    headers = ['Sector', 'Allocation', 'Selection', 'Interaction', 'Total']
+    table = tabulate(data, headers=headers, tablefmt='grid')
+    
+    return table
+
+# Example usage
+results = analysis.run_attribution_analysis()
+table = format_brinson_table(results)
+print("\nBrinson Attribution Results:")
+print(table)
+
+# Example output:
+# +------------+-------------+------------+-------------+---------+
+# | Sector     | Allocation | Selection  | Interaction | Total   |
+# +============+============+============+=============+=========+
+# | Technology | 1.20%      | 0.80%      | 0.20%       | 2.20%   |
+# | Healthcare | -0.50%     | 0.30%      | -0.10%      | -0.30%  |
+# | Financials | 0.30%      | 0.20%      | 0.05%       | 0.55%   |
+# | ...        | ...        | ...        | ...         | ...     |
+# +------------+-------------+------------+-------------+---------+
+# | Total      | 0.70%      | 1.10%      | 0.10%       | 1.90%   |
+# +------------+-------------+------------+-------------+---------+
+```
+
+3. **Combined Visualization**
+```python
+def plot_attribution_breakdown(results: dict):
+    """
+    Plot Brinson attribution breakdown as a stacked bar chart.
+    
+    Args:
+        results: Dictionary of attribution results
+    """
+    plt.figure(figsize=(12, 6))
+    sns.set_style("whitegrid")
+    
+    # Prepare data
+    sectors = list(results['allocation'].keys())[:-1]  # Exclude 'Total'
+    x = range(len(sectors))
+    width = 0.8
+    
+    # Plot stacked bars
+    plt.bar(x, [results['allocation'][s] * 100 for s in sectors], 
+            width, label='Allocation')
+    plt.bar(x, [results['selection'][s] * 100 for s in sectors], 
+            width, bottom=[results['allocation'][s] * 100 for s in sectors],
+            label='Selection')
+    plt.bar(x, [results['interaction'][s] * 100 for s in sectors], 
+            width, bottom=[(results['allocation'][s] + results['selection'][s]) * 100 
+                          for s in sectors],
+            label='Interaction')
+    
+    # Customize plot
+    plt.title('Sector Attribution Breakdown', pad=20)
+    plt.xlabel('Sector')
+    plt.ylabel('Contribution (%)')
+    plt.xticks(x, sectors, rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    
+    return plt
+
+# Example usage
+plot = plot_attribution_breakdown(results)
+plot.show()
+
+# Example output:
+# [Stacked bar chart showing sector attribution breakdown]
+```
+
 ## Testing
 
 ### Running Tests
@@ -538,3 +696,27 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Academic papers on performance attribution
 - Open-source quantitative finance libraries
 - Financial industry best practices 
+
+from attribution.visualization import (
+    plot_factor_contributions,
+    format_brinson_table,
+    plot_attribution_breakdown,
+    plot_time_series_attribution,
+    save_visualization
+)
+
+# Plot factor contributions
+fig1 = plot_factor_contributions(factor_contributions)
+save_visualization(fig1, 'factor_contributions.png')
+
+# Format and print Brinson table
+table = format_brinson_table(attribution_results)
+print(table)
+
+# Plot attribution breakdown
+fig2 = plot_attribution_breakdown(attribution_results)
+save_visualization(fig2, 'attribution_breakdown.png')
+
+# Plot time series attribution
+fig3 = plot_time_series_attribution(time_series_results)
+save_visualization(fig3, 'time_series_attribution.png') 
