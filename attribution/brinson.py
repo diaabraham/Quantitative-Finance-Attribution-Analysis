@@ -209,29 +209,27 @@ class BrinsonAttribution:
         pd.DataFrame
             DataFrame with dates as index and rolling attribution effects as columns
         """
-        # Initialize results DataFrame
-        results = pd.DataFrame(index=self.portfolio_returns.index)
-        
-        # Calculate rolling effects
+        keys = ["allocation", "selection", "interaction", "total"]
+        results = pd.DataFrame(
+            index=self.portfolio_returns.index[window:],
+            columns=keys,
+            dtype=float,
+        )
+
         for i in range(window, len(self.portfolio_returns)):
-            # Get data for the window
-            portfolio_returns = self.portfolio_returns.iloc[i-window:i]
-            benchmark_returns = self.benchmark_returns.iloc[i-window:i]
-            portfolio_weights = self.portfolio_weights.iloc[i-window:i]
-            benchmark_weights = self.benchmark_weights.iloc[i-window:i]
-            
-            # Create Brinson model for the window
+            portfolio_returns = self.portfolio_returns.iloc[i - window : i]
+            benchmark_returns = self.benchmark_returns.iloc[i - window : i]
+            portfolio_weights = self.portfolio_weights.iloc[i - window : i]
+            benchmark_weights = self.benchmark_weights.iloc[i - window : i]
+
             brinson = BrinsonAttribution(
                 portfolio_returns,
                 benchmark_returns,
                 portfolio_weights,
-                benchmark_weights
+                benchmark_weights,
             )
-            
-            # Calculate attribution
             attribution = brinson.calculate_attribution()
-            
-            # Store results
-            results.loc[portfolio_returns.index[-1]] = attribution
-        
+            idx = portfolio_returns.index[-1]
+            results.loc[idx, keys] = [attribution[k] for k in keys]
+
         return results 

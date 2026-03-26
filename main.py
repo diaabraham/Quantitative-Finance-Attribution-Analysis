@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from ta.momentum import RSIIndicator, MACD
-from ta.trend import SMAIndicator
+from ta.momentum import RSIIndicator
+from ta.trend import MACD, SMAIndicator
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime, timedelta

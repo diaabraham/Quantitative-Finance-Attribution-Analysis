@@ -101,21 +101,14 @@ class RiskAttribution:
         Returns:
         --------
         pd.Series
-            Risk contributions from each factor
+            Per-factor contribution to variance (exp ⊙ (Cov @ exp))
         """
-        portfolio_vol = np.sqrt(self.weights @ self.total_cov @ self.weights)
-        
-        # Calculate factor risk contributions
-        factor_risk = []
-        for factor in self.factor_returns.columns:
-            # Get factor exposure
-            exposure = self.factor_exposures[factor]
-            
-            # Calculate contribution
-            contrib = (exposure @ self.factor_cov[factor] @ exposure.T) / portfolio_vol
-            factor_risk.append(contrib)
-        
-        return pd.Series(factor_risk, index=self.factor_returns.columns)
+        factors = list(self.factor_returns.columns)
+        cov = self.factor_returns.cov()
+        exp = self.factor_exposures[factors].mean()
+        cov_exp = cov @ exp
+        contrib_var = exp * cov_exp
+        return contrib_var
     
     def calculate_tracking_error(self, benchmark_weights: pd.Series) -> float:
         """

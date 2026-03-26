@@ -9,6 +9,33 @@ from dotenv import load_dotenv
 import requests
 import re
 
+
+def _adjusted_close_series(df: pd.DataFrame, symbol: str) -> pd.Series:
+    """
+    Extract adjusted close from yfinance output, including modern MultiIndex frames
+    where adjusted prices are in 'Close' (no separate 'Adj Close' column).
+    """
+    if df is None or df.empty:
+        return pd.Series(dtype=float)
+    if isinstance(df.columns, pd.MultiIndex):
+        adj = ("Adj Close", symbol)
+        close = ("Close", symbol)
+        if adj in df.columns:
+            return df[adj].squeeze()
+        if close in df.columns:
+            return df[close].squeeze()
+        tickers = df.columns.get_level_values(-1).unique()
+        if len(tickers) == 1:
+            sym = tickers[0]
+            if ("Adj Close", sym) in df.columns:
+                return df[("Adj Close", sym)].squeeze()
+            return df[("Close", sym)].squeeze()
+        raise KeyError(f"Could not resolve price columns for {symbol}")
+    if "Adj Close" in df.columns:
+        return df["Adj Close"]
+    return df["Close"]
+
+
 class DataManager:
     def __init__(self, data_dir='data/raw', cache_dir='data/cache'):
         """
@@ -249,30 +276,44 @@ class DataManager:
         end_date : str
             End date in YYYY-MM-DD format
         """
+        start = pd.Timestamp(start_date)
+        end = pd.Timestamp(end_date)
+        if start >= end:
+            raise ValueError("start_date must be before end_date")
+
         cache_file = os.path.join(self.cache_dir, f'price_data_{start_date}_{end_date}.csv')
         
         # Check if cached data exists
         if os.path.exists(cache_file):
-            return pd.read_csv(cache_file, index_col=0, parse_dates=True)
+            cached = pd.read_csv(cache_file, index_col=0, parse_dates=True)
+            if not cached.empty:
+                cached.index = pd.DatetimeIndex(pd.to_datetime(cached.index)).astype(
+                    "datetime64[ns]"
+                )
+                return cached
         
         # Fetch new data
         data = {}
         for symbol in symbols:
             try:
-                df = yf.download(symbol, start=start_date, end=end_date)
-                data[symbol] = df['Adj Close']
+                df = yf.download(symbol, start=start_date, end=end_date, progress=False)
+                data[symbol] = _adjusted_close_series(df, symbol)
             except Exception as e:
                 print(f"Error fetching data for {symbol}: {e}")
         
         df = pd.DataFrame(data)
+        if df.empty or df.columns.empty:
+            raise ValueError("No price data retrieved for symbols: " + ", ".join(symbols))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df.index)).astype("datetime64[ns]")
         df.to_csv(cache_file)
         return df
     
     def get_risk_free_rate(self):
         """Fetch risk-free rate data (e.g., 10-year Treasury yield)"""
         try:
-            df = yf.download('^TNX', period='1y')['Adj Close']
-            return df.iloc[-1] / 100  # Convert to decimal
+            raw = yf.download("^TNX", period="1y", progress=False)
+            s = _adjusted_close_series(raw, "^TNX")
+            return float(s.iloc[-1]) / 100  # Convert to decimal
         except Exception as e:
             print(f"Error fetching risk-free rate: {e}")
             return 0.02  # Default to 2% if fetch fails
@@ -285,8 +326,11 @@ class DataManager:
             end_date = datetime.now().strftime('%Y-%m-%d')
             
         try:
-            df = yf.download(symbol, start=start_date, end=end_date)
-            return df['Adj Close']
+            df = yf.download(symbol, start=start_date, end=end_date, progress=False)
+            s = _adjusted_close_series(df, symbol)
+            if s.empty:
+                return None
+            return s
         except Exception as e:
             print(f"Error fetching market data: {e}")
             return None 
