@@ -65,16 +65,16 @@ class HighProbabilityMeanReversion:
 
     def __init__(
         self,
-        z_entry: float = 2.5,
+        z_entry: float = 2.25,
         z_window: int = 20,
         rsi_period: int = 14,
-        rsi_low: float = 25.0,
-        rsi_high: float = 75.0,
-        tp_atr: float = 0.20,
-        sl_atr: float = 2.50,
+        rsi_low: float = 28.0,
+        rsi_high: float = 72.0,
+        tp_atr: float = 0.22,
+        sl_atr: float = 2.20,
         atr_window: int = 14,
         max_hold: int = 8,
-        max_spread_bps: float = 30.0,
+        max_spread_bps: float = 35.0,
         cost_bps: float = 1.0,
         trend_sma: int = 0,
         executor: Optional[SpreadAwareExecutor] = None,
@@ -281,11 +281,11 @@ class OptionsCreditPutPath:
 
     def __init__(
         self,
-        short_otm_pct: float = 0.07,
+        short_otm_pct: float = 0.09,
         width_pct: float = 0.03,
-        hold_days: int = 7,
+        hold_days: int = 5,
         vol_lookback: int = 20,
-        rsi_entry: float = 32.0,
+        rsi_entry: float = 40.0,
         max_spread_bps: float = 35.0,
         rate: float = 0.04,
     ):
