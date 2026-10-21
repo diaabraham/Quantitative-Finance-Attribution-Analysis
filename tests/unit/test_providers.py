@@ -183,8 +183,41 @@ def test_high_probability_and_credit_spread_smoke():
     # Inject a sharp drop + bounce so mean-reversion can fire
     ohlc.iloc[80, ohlc.columns.get_loc("Close")] *= 0.93
     ohlc.iloc[80, ohlc.columns.get_loc("Low")] *= 0.92
-    eq = HighProbabilityMeanReversion(z_entry=1.5, max_spread_bps=50)
-    opt = OptionsCreditPutPath(hold_days=5, rsi_entry=50)
+    eq = HighProbabilityMeanReversion(
+        z_entry=1.5, max_spread_bps=50, trend_sma=20, rsi_low=40, rsi_high=60
+    )
+    opt = OptionsCreditPutPath(hold_days=5, rsi_entry=50, short_otm_pct=0.04)
     t1 = eq.run(ohlc, "TEST", "stocks", "1y")
     t2 = opt.run(ohlc, "TEST", "1y")
     assert isinstance(summarize_trades(t1 + t2).n_trades, int)
+
+
+def test_win_rate_definition_and_trend_filter_skips_countertrend():
+    """Wins require pnl>0; trend_sma blocks counter-trend fades."""
+    from strategies.high_probability import (
+        HighProbabilityMeanReversion,
+        Trade,
+        summarize_trades,
+    )
+
+    wins = summarize_trades(
+        [
+            Trade("A", "stocks", "1y", pd.Timestamp("2024-01-02"), pd.Timestamp("2024-01-03"), "buy", 1, 1.1, 0.1, 0.1, 1, "tp"),
+            Trade("B", "stocks", "1y", pd.Timestamp("2024-01-02"), pd.Timestamp("2024-01-03"), "buy", 1, 0.9, -0.1, -0.1, 1, "sl"),
+        ]
+    )
+    assert wins.n_trades == 2 and wins.n_wins == 1 and wins.win_rate == 0.5
+
+    idx = pd.date_range("2023-01-01", periods=100, freq="B")
+    # Strong downtrend — longs should be blocked by trend_sma
+    close = np.linspace(120, 80, 100)
+    ohlc = pd.DataFrame(
+        {"Open": close, "High": close + 1, "Low": close - 1, "Close": close},
+        index=idx,
+    )
+    ohlc.iloc[90, ohlc.columns.get_loc("Close")] *= 0.90
+    ohlc.iloc[90, ohlc.columns.get_loc("Low")] *= 0.88
+    blocked = HighProbabilityMeanReversion(
+        z_entry=1.0, rsi_low=50, trend_sma=30, max_spread_bps=100, tp_atr=0.5, sl_atr=2.0
+    )
+    assert blocked.run(ohlc, "DN", "stocks", "1y") == []
