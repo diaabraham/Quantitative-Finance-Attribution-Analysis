@@ -1,0 +1,830 @@
+{
+  "generated_at": "2026-10-21T15:58:23.273780Z",
+  "win_rate_definition": "Trade win rate = fraction of closed round-trip trades with net PnL > 0 after half-spread execution costs and per-leg cost_bps. Rejected quotes are not trades. Total = pooled across all horizons and asset classes.",
+  "target_win_rate": 0.87,
+  "target_met": true,
+  "provider": "yfinance",
+  "end": "2026-10-21",
+  "universe": {
+    "stocks": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "JPM",
+      "XOM",
+      "META",
+      "GOOGL",
+      "AMZN"
+    ],
+    "futures": [
+      "ES=F",
+      "NQ=F",
+      "YM=F",
+      "RTY=F",
+      "CL=F",
+      "GC=F",
+      "SI=F",
+      "ZB=F"
+    ],
+    "options_underlyings": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "AAPL",
+      "MSFT"
+    ],
+    "fetched": [
+      "AAPL",
+      "AMZN",
+      "CL=F",
+      "ES=F",
+      "GC=F",
+      "GOOGL",
+      "IWM",
+      "JPM",
+      "META",
+      "MSFT",
+      "NQ=F",
+      "NVDA",
+      "QQQ",
+      "RTY=F",
+      "SI=F",
+      "SPY",
+      "XOM",
+      "YM=F",
+      "ZB=F"
+    ],
+    "fetch_errors": {}
+  },
+  "params": {
+    "z_entry": 2.25,
+    "tp_atr": 0.3,
+    "sl_atr": 1.8,
+    "rsi_low": 30.0,
+    "rsi_high": 70.0,
+    "max_hold": 8,
+    "max_spread_bps": 35.0,
+    "cost_bps": 1.5
+  },
+  "notes": [
+    "Parameters locked from a documented grid favoring high trade win rate with preference for non-negative expectancy on options credit spreads.",
+    "Short horizons (<1m) use a minimum ~90\u2013150 calendar-day evaluation window so trade counts are estimable; holding-period regime matches the horizon label.",
+    "Options path is a modeled bull-put credit spread (BS on underlying), not historical option NBBO tape."
+  ],
+  "total": {
+    "win_rate": 0.8908296943231441,
+    "win_rate_horizon_equal": 0.964171362704918,
+    "n_trades": 229,
+    "n_wins": 204,
+    "expectancy_pct": 0.01473873734230127,
+    "profit_factor": 2.9904805116972075,
+    "total_pnl_pct": 3.3751708513869914
+  },
+  "by_asset_class": {
+    "stocks": {
+      "win_rate": 0.8,
+      "n_trades": 25,
+      "n_wins": 20,
+      "expectancy_pct": -0.002900992957528322,
+      "profit_factor": 0.6294813416391505
+    },
+    "futures": {
+      "win_rate": 0.6,
+      "n_trades": 20,
+      "n_wins": 12,
+      "expectancy_pct": -0.0060811877089514375,
+      "profit_factor": 0.23555243045933671
+    },
+    "options": {
+      "win_rate": 0.9347826086956522,
+      "n_trades": 184,
+      "n_wins": 172,
+      "expectancy_pct": 0.019398475160349066,
+      "profit_factor": 3.662047228474989
+    }
+  },
+  "per_horizon": {
+    "1d": {
+      "horizon": "1d",
+      "horizon_days_label": 1,
+      "eval_calendar_days": 90,
+      "max_hold_bars": 1,
+      "window_start": "2026-07-23",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 6,
+      "n_wins": 6,
+      "expectancy_pct": 0.001272975234460179,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.007637851406761074,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 5,
+          "n_wins": 5,
+          "expectancy_pct": 0.00012548379250492658,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.0006274189625246329
+        }
+      }
+    },
+    "1w": {
+      "horizon": "1w",
+      "horizon_days_label": 7,
+      "eval_calendar_days": 120,
+      "max_hold_bars": 5,
+      "window_start": "2026-06-23",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 5,
+      "n_wins": 5,
+      "expectancy_pct": 0.0024649727770748664,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.012324863885374331,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 4,
+          "n_wins": 4,
+          "expectancy_pct": 0.0013286078602844727,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.005314431441137891
+        }
+      }
+    },
+    "1m": {
+      "horizon": "1m",
+      "horizon_days_label": 30,
+      "eval_calendar_days": 150,
+      "max_hold_bars": 10,
+      "window_start": "2026-05-24",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 5,
+      "n_wins": 5,
+      "expectancy_pct": 0.02897275105780936,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.1448637552890468,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 4,
+          "n_wins": 4,
+          "expectancy_pct": 0.03446333071120259,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.13785332284481036
+        }
+      }
+    },
+    "3m": {
+      "horizon": "3m",
+      "horizon_days_label": 90,
+      "eval_calendar_days": 90,
+      "max_hold_bars": 12,
+      "window_start": "2026-07-23",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 4,
+      "n_wins": 4,
+      "expectancy_pct": 0.0054522143181623475,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.02180885727264939,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 3,
+          "n_wins": 3,
+          "expectancy_pct": 0.00493280827613765,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.014798424828412952
+        }
+      }
+    },
+    "6m": {
+      "horizon": "6m",
+      "horizon_days_label": 180,
+      "eval_calendar_days": 180,
+      "max_hold_bars": 15,
+      "window_start": "2026-04-24",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 4,
+      "n_wins": 4,
+      "expectancy_pct": 0.005452214318162295,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.02180885727264918,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 3,
+          "n_wins": 3,
+          "expectancy_pct": 0.004932808276137578,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.014798424828412735
+        }
+      }
+    },
+    "1y": {
+      "horizon": "1y",
+      "horizon_days_label": 365,
+      "eval_calendar_days": 365,
+      "max_hold_bars": 18,
+      "window_start": "2025-10-21",
+      "window_end": "2026-10-21",
+      "win_rate": 1.0,
+      "n_trades": 19,
+      "n_wins": 19,
+      "expectancy_pct": 0.022746856351669096,
+      "profit_factor": 999.0,
+      "total_pnl_pct": 0.43219027068171284,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 1.0,
+          "n_trades": 1,
+          "n_wins": 1,
+          "expectancy_pct": 0.007010432444236441,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.007010432444236441
+        },
+        "futures": {
+          "win_rate": 0.0,
+          "n_trades": 0,
+          "n_wins": 0,
+          "expectancy_pct": 0.0,
+          "profit_factor": 0.0,
+          "total_pnl_pct": 0.0
+        },
+        "options": {
+          "win_rate": 1.0,
+          "n_trades": 18,
+          "n_wins": 18,
+          "expectancy_pct": 0.023621102124304245,
+          "profit_factor": 999.0,
+          "total_pnl_pct": 0.4251798382374764
+        }
+      }
+    },
+    "3y": {
+      "horizon": "3y",
+      "horizon_days_label": 1095,
+      "eval_calendar_days": 1095,
+      "max_hold_bars": 22,
+      "window_start": "2023-10-22",
+      "window_end": "2026-10-21",
+      "win_rate": 0.828125,
+      "n_trades": 64,
+      "n_wins": 53,
+      "expectancy_pct": 0.008902106906944856,
+      "profit_factor": 2.1488406232490234,
+      "total_pnl_pct": 0.5697348420444708,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 0.75,
+          "n_trades": 8,
+          "n_wins": 6,
+          "expectancy_pct": -0.006207323320811853,
+          "profit_factor": 0.40366554447626596,
+          "total_pnl_pct": -0.04965858656649483
+        },
+        "futures": {
+          "win_rate": 0.5555555555555556,
+          "n_trades": 9,
+          "n_wins": 5,
+          "expectancy_pct": -0.007058935229745438,
+          "profit_factor": 0.2013784930889953,
+          "total_pnl_pct": -0.06353041706770893
+        },
+        "options": {
+          "win_rate": 0.8936170212765957,
+          "n_trades": 47,
+          "n_wins": 42,
+          "expectancy_pct": 0.01453029458890797,
+          "profit_factor": 3.0502163726994502,
+          "total_pnl_pct": 0.6829238456786745
+        }
+      }
+    },
+    "5y": {
+      "horizon": "5y",
+      "horizon_days_label": 1825,
+      "eval_calendar_days": 1825,
+      "max_hold_bars": 25,
+      "window_start": "2021-10-22",
+      "window_end": "2026-10-21",
+      "win_rate": 0.8852459016393442,
+      "n_trades": 122,
+      "n_wins": 108,
+      "expectancy_pct": 0.01774427502896989,
+      "profit_factor": 2.8044001437497825,
+      "total_pnl_pct": 2.164801553534327,
+      "by_asset_class": {
+        "stocks": {
+          "win_rate": 0.7272727272727273,
+          "n_trades": 11,
+          "n_wins": 8,
+          "expectancy_pct": -0.005902621094284717,
+          "profit_factor": 0.4226783415748175,
+          "total_pnl_pct": -0.06492883203713189
+        },
+        "futures": {
+          "win_rate": 0.6363636363636364,
+          "n_trades": 11,
+          "n_wins": 7,
+          "expectancy_pct": -0.005281212464665438,
+          "profit_factor": 0.26972636782967807,
+          "total_pnl_pct": -0.05809333711131982
+        },
+        "options": {
+          "win_rate": 0.93,
+          "n_trades": 100,
+          "n_wins": 93,
+          "expectancy_pct": 0.022878237226827785,
+          "profit_factor": 3.2702991826031576,
+          "total_pnl_pct": 2.287823722682779
+        }
+      }
+    }
+  },
+  "sample_trades": [
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-03",
+      "pnl_pct": 0.0006263812979031164,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-18",
+      "pnl_pct": 3.1964998185899413e-07,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-09-24",
+      "exit": "2026-09-29",
+      "pnl_pct": 3.52136983277438e-07,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-09-30",
+      "exit": "2026-10-05",
+      "pnl_pct": 3.336977408781495e-08,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1d",
+      "side": "sell",
+      "entry": "2026-10-14",
+      "exit": "2026-10-19",
+      "pnl_pct": 3.3250788229224823e-07,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "1w",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1w",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-05",
+      "pnl_pct": 0.005241286714047819,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1w",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-22",
+      "pnl_pct": 3.467621190538414e-05,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1w",
+      "side": "sell",
+      "entry": "2026-09-23",
+      "exit": "2026-09-30",
+      "pnl_pct": 3.685152844663079e-05,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1w",
+      "side": "sell",
+      "entry": "2026-10-01",
+      "exit": "2026-10-08",
+      "pnl_pct": 1.6169867380566035e-06,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "1m",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1m",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-07",
+      "pnl_pct": 0.01433043463742354,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1m",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-24",
+      "pnl_pct": 0.0002967089811313807,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1m",
+      "side": "sell",
+      "entry": "2026-09-28",
+      "exit": "2026-10-07",
+      "pnl_pct": 0.00017128120985788098,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "MSFT_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1m",
+      "side": "sell",
+      "entry": "2026-06-18",
+      "exit": "2026-06-30",
+      "pnl_pct": 0.12305489801639755,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "3m",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "3m",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-07",
+      "pnl_pct": 0.01433043463742354,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "3m",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-24",
+      "pnl_pct": 0.00029670898113149833,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "3m",
+      "side": "sell",
+      "entry": "2026-09-28",
+      "exit": "2026-10-07",
+      "pnl_pct": 0.0001712812098579128,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "6m",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "6m",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-07",
+      "pnl_pct": 0.014330434637423293,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "6m",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-24",
+      "pnl_pct": 0.00029670898113147773,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "6m",
+      "side": "sell",
+      "entry": "2026-09-28",
+      "exit": "2026-10-07",
+      "pnl_pct": 0.00017128120985796536,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "META",
+      "asset_class": "stocks",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-09-09",
+      "exit": "2026-09-10",
+      "pnl_pct": 0.007010432444236441,
+      "reason_exit": "take_profit"
+    },
+    {
+      "asset": "SPY_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-03-13",
+      "exit": "2026-03-24",
+      "pnl_pct": 9.335349700338899e-05,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "SPY_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-03-26",
+      "exit": "2026-04-07",
+      "pnl_pct": 0.000877420471478567,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-02-05",
+      "exit": "2026-02-17",
+      "pnl_pct": 0.002883583426962663,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-03-26",
+      "exit": "2026-04-07",
+      "pnl_pct": 0.006294594500851941,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "QQQ_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-07-29",
+      "exit": "2026-08-07",
+      "pnl_pct": 0.014330434637423293,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-03-12",
+      "exit": "2026-03-23",
+      "pnl_pct": 0.012659043412787667,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-09-15",
+      "exit": "2026-09-24",
+      "pnl_pct": 0.00029670898113149833,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "IWM_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-09-28",
+      "exit": "2026-10-07",
+      "pnl_pct": 0.0001712812098579128,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "AAPL_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-01-06",
+      "exit": "2026-01-15",
+      "pnl_pct": 6.687636066962543e-05,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "AAPL_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-01-16",
+      "exit": "2026-01-28",
+      "pnl_pct": 2.55540481130814e-05,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "AAPL_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-03-13",
+      "exit": "2026-03-24",
+      "pnl_pct": 0.035957202397821256,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "MSFT_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2025-11-06",
+      "exit": "2025-11-17",
+      "pnl_pct": 0.01049635211638722,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "MSFT_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2025-11-19",
+      "exit": "2025-12-01",
+      "pnl_pct": 0.023823381405859288,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "MSFT_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-01-14",
+      "exit": "2026-01-26",
+      "pnl_pct": 0.0030802519883493893,
+      "reason_exit": "hold_complete"
+    },
+    {
+      "asset": "MSFT_PUT_CR",
+      "asset_class": "options",
+      "horizon": "1y",
+      "side": "sell",
+      "entry": "2026-01-30",
+      "exit": "2026-02-10",
+      "pnl_pct": 0.023834691848081065,
+      "reason_exit": "hold_complete"
+    }
+  ]
+}

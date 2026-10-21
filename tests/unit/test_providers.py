@@ -1,6 +1,7 @@
 import os
 from unittest.mock import MagicMock, patch
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -159,3 +160,31 @@ def test_build_provider_fallback_skips_unauthed(monkeypatch):
     p = build_provider("yfinance", fallbacks=["polygon", "databento"])
     # polygon/databento skipped due to missing keys → plain yfinance or fallback chain without them
     assert "yfinance" in p.name
+
+
+def test_high_probability_and_credit_spread_smoke():
+    from strategies.high_probability import (
+        HighProbabilityMeanReversion,
+        OptionsCreditPutPath,
+        summarize_trades,
+    )
+
+    idx = pd.date_range("2023-01-01", periods=120, freq="B")
+    rng = np.linspace(100, 110, 120) + np.sin(np.linspace(0, 12, 120)) * 3
+    ohlc = pd.DataFrame(
+        {
+            "Open": rng,
+            "High": rng + 1.5,
+            "Low": rng - 1.5,
+            "Close": rng,
+        },
+        index=idx,
+    )
+    # Inject a sharp drop + bounce so mean-reversion can fire
+    ohlc.iloc[80, ohlc.columns.get_loc("Close")] *= 0.93
+    ohlc.iloc[80, ohlc.columns.get_loc("Low")] *= 0.92
+    eq = HighProbabilityMeanReversion(z_entry=1.5, max_spread_bps=50)
+    opt = OptionsCreditPutPath(hold_days=5, rsi_entry=50)
+    t1 = eq.run(ohlc, "TEST", "stocks", "1y")
+    t2 = opt.run(ohlc, "TEST", "1y")
+    assert isinstance(summarize_trades(t1 + t2).n_trades, int)
