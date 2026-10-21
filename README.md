@@ -43,6 +43,34 @@ Performance attribution is the process of explaining why a portfolio's returns d
   - Implementation Shortfall
   - Trading Schedule Optimization
 
+## Market Data Providers
+
+Historical prices are loaded through pluggable providers in `data/providers/`:
+
+| Provider | Env var(s) | Notes |
+|---|---|---|
+| `yfinance` | none | Default free source (Yahoo) |
+| `stooq` | `STOOQ_API_KEY` (optional/required by IP) | Free CSV; some networks need a captcha API key |
+| `massive` | `MASSIVE_API_KEY` or `POLYGON_API_KEY` | Massive.com (Polygon.io rebrand); host `api.massive.com` |
+| `polygon` | `POLYGON_API_KEY` or `MASSIVE_API_KEY` | Legacy Polygon host `api.polygon.io` (same keys) |
+| `databento` | `DATABENTO_API_KEY` | Uses `EQUS.SUMMARY` / `ohlcv-1d` by default |
+
+```python
+from data.data_manager import DataManager
+
+dm = DataManager(provider="yfinance")          # or stooq / massive / polygon / databento / auto
+prices = dm.fetch_historical_data(["XLK", "XLF"], "2024-01-02", "2024-12-31")
+```
+
+Backtest across every configured provider:
+
+```bash
+PYTHONPATH=. python scripts/backtest_providers.py --start 2023-01-03 --end 2024-12-31
+python main.py --provider yfinance --start 2023-01-03 --end 2024-12-31 --no-plot
+```
+
+Copy `.env.example` to `.env` and fill in vendor keys for Massive/Polygon/Databento (and Stooq if your IP is challenged).
+
 ## Installation
 
 1. Clone the repository:

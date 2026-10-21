@@ -1,0 +1,29 @@
+# Virtualenvs / local Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets / local env
+.env
+.env.local
+
+# OS / IDE
+.DS_Store
+.idea/
+*.swp
+
+# Generated caches / reports (keep structure)
+data/cache/*
+!data/cache/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+
+# Local plots
+*.png
+!docs/**/*.png

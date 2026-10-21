@@ -13,5 +13,12 @@ requests>=2.31.0
 python-dotenv>=1.0.0
 statsmodels>=0.14.0
 
+# Market data providers (optional keys via env)
+# Stooq: free CSV (optional STOOQ_API_KEY)
+# Massive: rebrand of Polygon.io (MASSIVE_API_KEY or POLYGON_API_KEY)
+massive>=1.0.0
+polygon-api-client>=1.14.0
+databento>=0.40.0
+
 # Dev / tests
 pytest>=8.0.0

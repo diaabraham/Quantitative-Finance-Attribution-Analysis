@@ -106,33 +106,100 @@ class RiskManager:
             - 'mean_variance': Mean-variance optimization
             - 'risk_budgeting': Risk budgeting with custom budgets
         """
-        if method == 'risk_parity':
-            return self._risk_parity_weights(returns)
-        elif method == 'min_variance':
-            return self._min_variance_weights(returns)
-        elif method == 'max_sharpe':
-            return self._max_sharpe_weights(returns)
-        elif method == 'equal_risk':
-            return self._equal_risk_weights(returns)
-        elif method == 'black_litterman':
-            return self._black_litterman_weights(returns)
-        elif method == 'hierarchical_risk_parity':
-            return self._hierarchical_risk_parity_weights(returns)
-        elif method == 'mean_variance':
-            return self._mean_variance_weights(returns)
-        elif method == 'risk_budgeting':
-            return self._risk_budgeting_weights(returns)
-        else:
+        method_map = {
+            'risk_parity': self._risk_parity_weights,
+            'min_variance': self._min_variance_weights,
+            'max_sharpe': self._max_sharpe_weights,
+            'equal_risk': self._equal_risk_weights,
+            'black_litterman': self._black_litterman_weights,
+            'hierarchical_risk_parity': self._hierarchical_risk_parity_weights,
+            'mean_variance': self._mean_variance_weights,
+            'risk_budgeting': self._risk_budgeting_weights,
+        }
+        if method not in method_map:
             raise ValueError(f"Unknown weighting method: {method}")
+
+        # Align and compute target weights among currently signaled assets.
+        # Re-optimize when the active set changes or on a monthly cadence.
+        signals = signals.astype(float).reindex(columns=returns.columns).fillna(0.0)
+        returns = returns.reindex(columns=signals.columns)
+        weights = pd.DataFrame(0.0, index=signals.index, columns=signals.columns)
+        lookback = max(20, int(self.lookback_period))
+        last_active_key = None
+        last_target: Optional[pd.Series] = None
+        last_opt_i = -10_000
+
+        for i, date in enumerate(signals.index):
+            active = signals.loc[date]
+            active_assets = active[active > 0].index.tolist()
+            if not active_assets:
+                last_active_key = None
+                last_target = None
+                continue
+
+            active_key = tuple(active_assets)
+            should_reoptimize = (
+                last_target is None
+                or active_key != last_active_key
+                or (i - last_opt_i) >= 21
+            )
+            if should_reoptimize:
+                start_i = max(0, i - lookback)
+                hist = returns.iloc[start_i:i][active_assets].dropna(how="all")
+                if len(hist) < 5:
+                    target = pd.Series(
+                        np.ones(len(active_assets)) / len(active_assets),
+                        index=active_assets,
+                    )
+                else:
+                    hist = hist.dropna(axis=1, how="any")
+                    usable = [c for c in active_assets if c in hist.columns]
+                    if len(usable) < 1:
+                        target = pd.Series(
+                            np.ones(len(active_assets)) / len(active_assets),
+                            index=active_assets,
+                        )
+                    else:
+                        try:
+                            target = method_map[method](hist[usable])
+                        except Exception:
+                            target = pd.Series(
+                                np.ones(len(usable)) / len(usable),
+                                index=usable,
+                            )
+                        if not isinstance(target, pd.Series):
+                            target = pd.Series(target, index=usable)
+                        target = target.reindex(active_assets).fillna(0.0)
+
+                target = target.clip(lower=0.0, upper=self.max_position_size)
+                if float(target.sum()) <= 0:
+                    target = pd.Series(
+                        np.ones(len(active_assets)) / len(active_assets),
+                        index=active_assets,
+                    )
+                else:
+                    target = target / target.sum()
+                last_target = target
+                last_active_key = active_key
+                last_opt_i = i
+
+            weights.loc[date, last_target.index] = last_target.values
+
+        return weights
     
     def _risk_parity_weights(self, returns):
         """Calculate risk parity weights"""
         # Calculate covariance matrix
         cov_matrix = returns.cov()
+        if cov_matrix.isna().any().any() or returns.shape[1] == 0:
+            n = returns.shape[1]
+            return pd.Series(np.ones(n) / max(n, 1), index=returns.columns)
         
         # Define objective function
         def objective(weights):
             portfolio_vol = np.sqrt(weights.T @ cov_matrix @ weights)
+            if portfolio_vol == 0:
+                return 0.0
             risk_contributions = weights * (cov_matrix @ weights) / portfolio_vol
             return np.sum((risk_contributions - 1/len(weights))**2)
         
@@ -172,6 +239,8 @@ class RiskManager:
         def objective(weights):
             portfolio_return = weights.T @ expected_returns
             portfolio_vol = np.sqrt(weights.T @ cov_matrix @ weights)
+            if portfolio_vol == 0:
+                return 0.0
             return -portfolio_return / portfolio_vol
         
         n_assets = len(returns.columns)
@@ -186,9 +255,13 @@ class RiskManager:
     
     def _equal_risk_weights(self, returns):
         """Calculate equal risk contribution weights"""
-        volatilities = returns.std()
+        volatilities = returns.std().replace(0, np.nan)
         weights = 1 / volatilities
-        weights = weights / weights.sum()
+        weights = weights.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+        if weights.sum() == 0:
+            weights = pd.Series(np.ones(len(returns.columns)) / len(returns.columns), index=returns.columns)
+        else:
+            weights = weights / weights.sum()
         return weights.clip(0, self.max_position_size)
     
     def _black_litterman_weights(self, returns: pd.DataFrame) -> pd.Series:
@@ -299,11 +372,32 @@ class RiskManager:
             Series of benchmark returns
         """
         metrics = {}
+        returns = pd.Series(returns).replace([np.inf, -np.inf], np.nan).dropna()
+        if benchmark_returns is not None:
+            benchmark_returns = pd.Series(benchmark_returns).replace(
+                [np.inf, -np.inf], np.nan
+            )
+            aligned = pd.concat(
+                [returns.rename("r"), benchmark_returns.rename("b")], axis=1
+            ).dropna()
+            returns = aligned["r"]
+            benchmark_returns = aligned["b"]
+
+        if returns.empty:
+            return {
+                "Annualized Return": 0.0,
+                "Annualized Volatility": 0.0,
+                "Sharpe Ratio": 0.0,
+                "Maximum Drawdown": 0.0,
+            }
         
         # Basic metrics
         metrics['Annualized Return'] = returns.mean() * 252
         metrics['Annualized Volatility'] = returns.std() * np.sqrt(252)
-        metrics['Sharpe Ratio'] = metrics['Annualized Return'] / metrics['Annualized Volatility']
+        vol = metrics['Annualized Volatility']
+        metrics['Sharpe Ratio'] = (
+            metrics['Annualized Return'] / vol if vol and vol != 0 else 0.0
+        )
         
         # Maximum Drawdown
         cum_returns = (1 + returns).cumprod()
@@ -564,24 +658,42 @@ class RiskManager:
         weights : pd.DataFrame
             DataFrame of position weights
         sector_mapping : dict
-            Mapping of assets to sectors
+            Mapping of sectors to asset lists (or a single asset)
         """
+        if isinstance(weights, pd.Series):
+            # Defensive: promote static weights to a one-row frame
+            weights = weights.to_frame().T
+
         sector_exposure = pd.DataFrame(index=weights.index)
         
         # Calculate sector exposures
         for sector, assets in sector_mapping.items():
-            sector_exposure[sector] = weights[assets].sum(axis=1)
+            cols = list(assets) if isinstance(assets, (list, tuple, set)) else [assets]
+            cols = [c for c in cols if c in weights.columns]
+            if not cols:
+                sector_exposure[sector] = 0.0
+                continue
+            subset = weights[cols]
+            sector_exposure[sector] = (
+                subset if isinstance(subset, pd.Series) else subset.sum(axis=1)
+            )
             
-        # Check for violations
+        # Cap sector exposures by scaling constituents down to the limit
         violations = sector_exposure > self.max_sector_exposure
-        
         if violations.any().any():
-            print("Warning: Sector exposure limits exceeded")
-            # Here you would implement logic to adjust weights
-            # This is a simplified version
-            weights = weights * (1 - violations.astype(int))
-            weights = weights.div(weights.sum(axis=1), axis=0)
-            
+            print("Warning: Sector exposure limits exceeded; scaling to caps")
+            adjusted = weights.copy().astype(float)
+            for sector, assets in sector_mapping.items():
+                cols = list(assets) if isinstance(assets, (list, tuple, set)) else [assets]
+                cols = [c for c in cols if c in adjusted.columns]
+                if not cols:
+                    continue
+                exposure = sector_exposure[sector].replace(0, np.nan)
+                scale = (self.max_sector_exposure / exposure).clip(upper=1.0)
+                adjusted.loc[:, cols] = adjusted.loc[:, cols].mul(scale, axis=0)
+            row_sums = adjusted.sum(axis=1).replace(0, np.nan)
+            weights = adjusted.div(row_sums, axis=0).fillna(0.0)
+
         return weights
     
     def check_drawdown_limit(self, portfolio_value):
