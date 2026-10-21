@@ -10,9 +10,10 @@ from data.data_manager import DataManager
 from risk.risk_manager import RiskManager
 
 class SectorRotationAlpha:
-    def __init__(self, transaction_cost=0.001, max_position_size=0.2, 
-                 max_sector_exposure=0.3, max_drawdown=0.2,
-                 target_volatility=0.15, min_correlation_threshold=0.3):
+    def __init__(self, transaction_cost=0.001, max_position_size=0.35, 
+                 max_sector_exposure=0.4, max_drawdown=0.2,
+                 target_volatility=0.15, min_correlation_threshold=0.3,
+                 provider='auto', data_manager=None):
         """
         Initialize the Sector Rotation Alpha
         
@@ -30,8 +31,12 @@ class SectorRotationAlpha:
             Target annualized portfolio volatility
         min_correlation_threshold : float
             Minimum correlation threshold for diversification
+        provider : str
+            Market data provider (yfinance, stooq, massive, polygon, databento, auto)
+        data_manager : DataManager, optional
+            Injected data manager (overrides provider when provided)
         """
-        self.data_manager = DataManager()
+        self.data_manager = data_manager or DataManager(provider=provider)
         self.risk_manager = RiskManager(
             max_position_size=max_position_size,
             max_sector_exposure=max_sector_exposure,
@@ -44,8 +49,8 @@ class SectorRotationAlpha:
         self.data = None
         self.momentum_scores = None
         self.performance_metrics = None
-        
-    def fetch_data(self, start_date, end_date):
+    
+    def fetch_data(self, start_date, end_date, symbols=None, use_cache=True):
         """
         Fetch historical price data for all sector ETFs
         
@@ -55,13 +60,27 @@ class SectorRotationAlpha:
             Start date in YYYY-MM-DD format
         end_date : str
             End date in YYYY-MM-DD format
+        symbols : list, optional
+            Override the default sector ETF universe
+        use_cache : bool
+            Whether to reuse on-disk provider caches
         """
         # Get sector ETF information
         self.sector_etfs = self.data_manager.get_sector_etfs()
         
         # Fetch historical data
-        symbols = [info['symbol'] for info in self.sector_etfs.values()]
-        self.data = self.data_manager.fetch_historical_data(symbols, start_date, end_date)
+        if symbols is None:
+            symbols = [info['symbol'] for info in self.sector_etfs.values()]
+        else:
+            # Keep sector map aligned to the requested subset when possible
+            self.sector_etfs = {
+                sector: info
+                for sector, info in self.sector_etfs.items()
+                if info['symbol'] in symbols
+            } or self.sector_etfs
+        self.data = self.data_manager.fetch_historical_data(
+            symbols, start_date, end_date, use_cache=use_cache
+        )
         
         # Fetch benchmark data
         self.benchmark_data = self.data_manager.get_market_data(start_date=start_date, end_date=end_date)
@@ -76,27 +95,32 @@ class SectorRotationAlpha:
             raise ValueError("Data not loaded. Please fetch data first.")
             
         momentum_scores = pd.DataFrame(index=self.data.index)
+        symbols = list(self.data.columns)
         
-        for sector, info in self.sector_etfs.items():
-            symbol = info['symbol']
+        for symbol in symbols:
+            close = self.data[symbol].dropna()
+            if close.empty:
+                continue
             # Calculate RSI
-            rsi = RSIIndicator(close=self.data[symbol], window=14)
+            rsi = RSIIndicator(close=close, window=14)
             rsi_score = rsi.rsi()
             
             # Calculate MACD
-            macd = MACD(close=self.data[symbol])
+            macd = MACD(close=close)
             macd_score = macd.macd_diff()
+            macd_std = macd_score.std()
+            macd_norm = macd_score / macd_std if macd_std and macd_std != 0 else macd_score * 0
             
             # Calculate Price Momentum
-            price_momentum = self.data[symbol].pct_change(periods=20)
+            price_momentum = close.pct_change(periods=20)
             
             # Calculate Volatility
-            volatility = self.data[symbol].pct_change().rolling(window=20).std()
+            volatility = close.pct_change().rolling(window=20).std().replace(0, np.nan)
             
             # Combine indicators into a single score
             momentum_scores[symbol] = (
                 0.3 * (rsi_score / 100) +  # Normalize RSI to 0-1
-                0.3 * (macd_score / macd_score.std()) +  # Normalize MACD
+                0.3 * macd_norm +
                 0.2 * price_momentum +
                 0.2 * (1 / volatility)  # Inverse volatility weighting
             )
@@ -155,7 +179,10 @@ class SectorRotationAlpha:
         # Calculate transaction costs
         position_changes = weights.diff().abs()
         transaction_costs = (position_changes * self.transaction_cost).sum(axis=1)
-        strategy_returns -= transaction_costs
+        strategy_returns = strategy_returns - transaction_costs
+        
+        # Drop warm-up / empty days before compounding
+        strategy_returns = strategy_returns.replace([np.inf, -np.inf], np.nan).fillna(0.0)
         
         # Calculate cumulative returns
         cumulative_returns = (1 + strategy_returns).cumprod()
@@ -168,11 +195,15 @@ class SectorRotationAlpha:
             # Implement drawdown protection (e.g., reduce position sizes)
             weights = weights * 0.5  # Example: reduce positions by 50%
             
-        # Calculate performance metrics
+        # Calculate performance metrics on overlapping valid returns
         benchmark_returns = self.benchmark_data.pct_change()
+        aligned = pd.concat(
+            [strategy_returns.rename("strategy"), benchmark_returns.rename("benchmark")],
+            axis=1,
+        ).dropna()
         self.performance_metrics = self.risk_manager.calculate_risk_metrics(
-            strategy_returns, 
-            benchmark_returns
+            aligned["strategy"],
+            aligned["benchmark"],
         )
         
         return portfolio_value, strategy_returns, weights
@@ -226,31 +257,44 @@ class SectorRotationAlpha:
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize the strategy with risk parameters
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Sector rotation backtest")
+    parser.add_argument(
+        "--provider",
+        default="auto",
+        choices=["auto", "yfinance", "stooq", "massive", "polygon", "databento"],
+        help="Market data provider",
+    )
+    parser.add_argument("--start", default=None, help="YYYY-MM-DD")
+    parser.add_argument("--end", default=None, help="YYYY-MM-DD")
+    parser.add_argument("--no-plot", action="store_true")
+    args = parser.parse_args()
+
     strategy = SectorRotationAlpha(
         transaction_cost=0.001,  # 0.1% per transaction
         max_position_size=0.2,   # Maximum 20% in any single position
         max_sector_exposure=0.3, # Maximum 30% in any single sector
         max_drawdown=0.2,        # Maximum 20% drawdown
         target_volatility=0.15,  # Target 15% annualized volatility
-        min_correlation_threshold=0.3  # Minimum correlation for diversification
+        min_correlation_threshold=0.3,  # Minimum correlation for diversification
+        provider=args.provider,
     )
     
-    # Set date range (last 5 years)
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=5*365)
+    end_date = datetime.strptime(args.end, "%Y-%m-%d") if args.end else datetime.now()
+    start_date = (
+        datetime.strptime(args.start, "%Y-%m-%d")
+        if args.start
+        else end_date - timedelta(days=5 * 365)
+    )
     
-    # Fetch data
+    print(f"Provider: {strategy.data_manager.provider_name}")
     data = strategy.fetch_data(start_date.strftime('%Y-%m-%d'), 
                              end_date.strftime('%Y-%m-%d'))
     
-    # Calculate momentum indicators
     momentum_scores = strategy.calculate_momentum_indicators()
-    
-    # Generate signals
     signals = strategy.generate_signals(top_n=3)
     
-    # Backtest with different weighting methods
     weighting_methods = ['risk_parity', 'min_variance', 'max_sharpe', 'equal_risk']
     results = {}
     
@@ -262,4 +306,9 @@ if __name__ == "__main__":
             'strategy_returns': strategy_returns,
             'weights': weights
         }
-        strategy.plot_results(portfolio_value, weights, strategy_returns)
+        if not args.no_plot:
+            strategy.plot_results(portfolio_value, weights, strategy_returns)
+        else:
+            print("Performance Metrics:")
+            for metric, value in strategy.performance_metrics.items():
+                print(f"  {metric}: {value:.4f}")
