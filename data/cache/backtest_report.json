@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T16:29:31.722800Z",
+  "generated_at": "2026-10-21T22:21:19.536837Z",
   "start": "2024-10-21",
   "end": "2026-10-21",
   "provider_requested": "yfinance",
@@ -52,25 +52,25 @@
     "end": "2026-10-20",
     "methods": {
       "risk_parity": {
-        "final_value": 92289.0774093706,
-        "total_return": -0.07710922590629399,
-        "ann_vol": 0.14486521104046712,
-        "sharpe": -0.2060903365314229,
+        "final_value": 106892.6497231295,
+        "total_return": 0.06892649723129507,
+        "ann_vol": 0.10755122362263701,
+        "sharpe": 0.36545322149795717,
         "spread_rejected_mean": 0.02441783100465736
       },
       "equal_risk": {
-        "final_value": 92617.56588666353,
-        "total_return": -0.07382434113336467,
-        "ann_vol": 0.12068255864923474,
-        "sharpe": -0.25926300664685925,
+        "final_value": 92617.56588666372,
+        "total_return": -0.07382434113336278,
+        "ann_vol": 0.12068255864923473,
+        "sharpe": -0.2592630066468593,
         "spread_rejected_mean": 0.02441783100465736
       }
     },
     "brinson": {
-      "allocation": -0.02090798780094673,
+      "allocation": -0.020907987800946746,
       "selection": 0.0,
       "interaction": 0.0,
-      "total": -0.020907987800946725
+      "total": -0.020907987800946746
     },
     "provider": "yfinance+stooq"
   },

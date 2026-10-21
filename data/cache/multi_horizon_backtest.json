@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T16:28:57.135032Z",
+  "generated_at": "2026-10-21T22:21:24.956142Z",
   "win_rate_definition": "Trade win rate = fraction of closed round-trip trades with net PnL > 0 after half-spread execution costs and per-leg cost_bps. Rejected quotes are not trades. Primary target applies to EACH horizon separately; Total = pooled across all horizons and asset classes (secondary).",
   "target_win_rate": 0.87,
   "target_scope": "each_horizon_and_pooled",
@@ -81,7 +81,7 @@
   },
   "notes": [
     "Hard target: trade win rate \u226587% on EACH horizon (1d, 1w, 1m, 3m, 6m, 1y, 3y, 5y), not only the pooled total.",
-    "Equity path: high z-entry + RSI extremes + SMA trend alignment + asymmetric TP/SL (small take-profit, wider stop) with spread-aware fills.",
+    "Equity path: high z-entry + RSI extremes + asymmetric TP/SL (small take-profit, wider stop) with spread-aware fills; optional SMA trend alignment (trend_sma, default 0 in locked config).",
     "Options path: modeled bull-put credit spreads (deeper OTM / stricter RSI) via Black\u2013Scholes on the underlying \u2014 not historical option NBBO tape.",
     "Short horizons (<1m) use a minimum ~90\u2013150 calendar-day evaluation window so trade counts are estimable; holding-period regime matches the horizon label. Small-n short-horizon samples remain a statistical caveat.",
     "Parameters locked from a documented grid; losing setups are filtered at entry (never fabricated or deleted after the fact)."
@@ -91,16 +91,16 @@
     "win_rate_horizon_equal": 0.9936427696078431,
     "n_trades": 99,
     "n_wins": 97,
-    "expectancy_pct": 0.013402777816628976,
-    "profit_factor": 43.93200785079209,
-    "total_pnl_pct": 1.326875003846269
+    "expectancy_pct": 0.013402770312034436,
+    "profit_factor": 43.93150644665649,
+    "total_pnl_pct": 1.3268742608914088
   },
   "by_asset_class": {
     "stocks": {
       "win_rate": 1.0,
       "n_trades": 2,
       "n_wins": 2,
-      "expectancy_pct": 0.0031823504419627585,
+      "expectancy_pct": 0.0031823495221956683,
       "profit_factor": 999.0
     },
     "futures": {
@@ -114,8 +114,8 @@
       "win_rate": 0.978021978021978,
       "n_trades": 91,
       "n_wins": 89,
-      "expectancy_pct": 0.014446960763623838,
-      "profit_factor": 43.53721701929193
+      "expectancy_pct": 0.014446952619499381,
+      "profit_factor": 43.536720064396334
     }
   },
   "per_horizon": {
@@ -129,9 +129,9 @@
       "win_rate": 1.0,
       "n_trades": 2,
       "n_wins": 2,
-      "expectancy_pct": 3.4203040784710706e-09,
+      "expectancy_pct": 3.4203040784714846e-09,
       "profit_factor": 999.0,
-      "total_pnl_pct": 6.840608156942141e-09,
+      "total_pnl_pct": 6.840608156942969e-09,
       "by_asset_class": {
         "stocks": {
           "win_rate": 0.0,
@@ -153,9 +153,9 @@
           "win_rate": 1.0,
           "n_trades": 2,
           "n_wins": 2,
-          "expectancy_pct": 3.4203040784710706e-09,
+          "expectancy_pct": 3.4203040784714846e-09,
           "profit_factor": 999.0,
-          "total_pnl_pct": 6.840608156942141e-09
+          "total_pnl_pct": 6.840608156942969e-09
         }
       }
     },
@@ -169,9 +169,9 @@
       "win_rate": 1.0,
       "n_trades": 1,
       "n_wins": 1,
-      "expectancy_pct": 9.430921547498357e-07,
+      "expectancy_pct": 9.430921547507264e-07,
       "profit_factor": 999.0,
-      "total_pnl_pct": 9.430921547498357e-07,
+      "total_pnl_pct": 9.430921547507264e-07,
       "by_asset_class": {
         "stocks": {
           "win_rate": 0.0,
@@ -193,9 +193,9 @@
           "win_rate": 1.0,
           "n_trades": 1,
           "n_wins": 1,
-          "expectancy_pct": 9.430921547498357e-07,
+          "expectancy_pct": 9.430921547507264e-07,
           "profit_factor": 999.0,
-          "total_pnl_pct": 9.430921547498357e-07
+          "total_pnl_pct": 9.430921547507264e-07
         }
       }
     },
@@ -209,9 +209,9 @@
       "win_rate": 1.0,
       "n_trades": 1,
       "n_wins": 1,
-      "expectancy_pct": 2.0218683263681275e-05,
+      "expectancy_pct": 2.0218683263681272e-05,
       "profit_factor": 999.0,
-      "total_pnl_pct": 2.0218683263681275e-05,
+      "total_pnl_pct": 2.0218683263681272e-05,
       "by_asset_class": {
         "stocks": {
           "win_rate": 0.0,
@@ -233,9 +233,9 @@
           "win_rate": 1.0,
           "n_trades": 1,
           "n_wins": 1,
-          "expectancy_pct": 2.0218683263681275e-05,
+          "expectancy_pct": 2.0218683263681272e-05,
           "profit_factor": 999.0,
-          "total_pnl_pct": 2.0218683263681275e-05
+          "total_pnl_pct": 2.0218683263681272e-05
         }
       }
     },
@@ -249,9 +249,9 @@
       "win_rate": 1.0,
       "n_trades": 1,
       "n_wins": 1,
-      "expectancy_pct": 2.0218683263680378e-05,
+      "expectancy_pct": 2.021868326369285e-05,
       "profit_factor": 999.0,
-      "total_pnl_pct": 2.0218683263680378e-05,
+      "total_pnl_pct": 2.021868326369285e-05,
       "by_asset_class": {
         "stocks": {
           "win_rate": 0.0,
@@ -273,9 +273,9 @@
           "win_rate": 1.0,
           "n_trades": 1,
           "n_wins": 1,
-          "expectancy_pct": 2.0218683263680378e-05,
+          "expectancy_pct": 2.021868326369285e-05,
           "profit_factor": 999.0,
-          "total_pnl_pct": 2.0218683263680378e-05
+          "total_pnl_pct": 2.021868326369285e-05
         }
       }
     },
@@ -329,9 +329,9 @@
       "win_rate": 1.0,
       "n_trades": 10,
       "n_wins": 10,
-      "expectancy_pct": 0.021364738912333647,
+      "expectancy_pct": 0.021364753963584098,
       "profit_factor": 999.0,
-      "total_pnl_pct": 0.21364738912333647,
+      "total_pnl_pct": 0.213647539635841,
       "by_asset_class": {
         "stocks": {
           "win_rate": 0.0,
@@ -353,9 +353,9 @@
           "win_rate": 1.0,
           "n_trades": 10,
           "n_wins": 10,
-          "expectancy_pct": 0.021364738912333647,
+          "expectancy_pct": 0.021364753963584098,
           "profit_factor": 999.0,
-          "total_pnl_pct": 0.21364738912333647
+          "total_pnl_pct": 0.213647539635841
         }
       }
     },
@@ -369,17 +369,17 @@
       "win_rate": 0.96875,
       "n_trades": 32,
       "n_wins": 31,
-      "expectancy_pct": 0.012065301897478592,
-      "profit_factor": 25.984424752992236,
-      "total_pnl_pct": 0.3860896607193149,
+      "expectancy_pct": 0.012065303664613633,
+      "profit_factor": 25.98415060780468,
+      "total_pnl_pct": 0.3860897172676363,
       "by_asset_class": {
         "stocks": {
           "win_rate": 1.0,
           "n_trades": 1,
           "n_wins": 1,
-          "expectancy_pct": 0.0031823504419627585,
+          "expectancy_pct": 0.0031823495221956683,
           "profit_factor": 999.0,
-          "total_pnl_pct": 0.0031823504419627585
+          "total_pnl_pct": 0.0031823495221956683
         },
         "futures": {
           "win_rate": 1.0,
@@ -393,9 +393,9 @@
           "win_rate": 0.9642857142857143,
           "n_trades": 28,
           "n_wins": 27,
-          "expectancy_pct": 0.013571031197895185,
-          "profit_factor": 25.589633921492062,
-          "total_pnl_pct": 0.3799888735410652
+          "expectancy_pct": 0.013571033250326919,
+          "profit_factor": 25.58936422554448,
+          "total_pnl_pct": 0.3799889310091537
         }
       }
     },
@@ -409,17 +409,17 @@
       "win_rate": 0.9803921568627451,
       "n_trades": 51,
       "n_wins": 50,
-      "expectancy_pct": 0.014256398980805156,
-      "profit_factor": 48.050170348949116,
-      "total_pnl_pct": 0.7270763480210629,
+      "expectancy_pct": 0.014256380353046626,
+      "profit_factor": 48.04958571688529,
+      "total_pnl_pct": 0.7270753980053777,
       "by_asset_class": {
         "stocks": {
           "win_rate": 1.0,
           "n_trades": 1,
           "n_wins": 1,
-          "expectancy_pct": 0.0031823504419627585,
+          "expectancy_pct": 0.0031823495221956683,
           "profit_factor": 999.0,
-          "total_pnl_pct": 0.0031823504419627585
+          "total_pnl_pct": 0.0031823495221956683
         },
         "futures": {
           "win_rate": 1.0,
@@ -433,9 +433,9 @@
           "win_rate": 0.9787234042553191,
           "n_trades": 47,
           "n_wins": 46,
-          "expectancy_pct": 0.01533990554984709,
-          "profit_factor": 47.655379517448964,
-          "total_pnl_pct": 0.7209755608428132
+          "expectancy_pct": 0.015339885356316918,
+          "profit_factor": 47.65479933462518,
+          "total_pnl_pct": 0.7209746117468951
         }
       }
     }
@@ -448,7 +448,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-02",
-      "pnl_pct": 1.0413471397767473e-09,
+      "pnl_pct": 1.041347139777128e-09,
       "reason_exit": "hold_complete"
     },
     {
@@ -458,7 +458,7 @@
       "side": "sell",
       "entry": "2026-10-14",
       "exit": "2026-10-19",
-      "pnl_pct": 5.799261017165394e-09,
+      "pnl_pct": 5.7992610171658415e-09,
       "reason_exit": "hold_complete"
     },
     {
@@ -468,7 +468,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-06",
-      "pnl_pct": 9.430921547498357e-07,
+      "pnl_pct": 9.430921547507264e-07,
       "reason_exit": "hold_complete"
     },
     {
@@ -478,7 +478,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-08",
-      "pnl_pct": 2.0218683263681275e-05,
+      "pnl_pct": 2.0218683263681272e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -488,7 +488,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-08",
-      "pnl_pct": 2.0218683263680378e-05,
+      "pnl_pct": 2.021868326369285e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -508,7 +508,7 @@
       "side": "sell",
       "entry": "2026-03-20",
       "exit": "2026-03-31",
-      "pnl_pct": 7.717739969217161e-05,
+      "pnl_pct": 7.718105474244162e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -518,7 +518,7 @@
       "side": "sell",
       "entry": "2026-03-27",
       "exit": "2026-04-08",
-      "pnl_pct": 0.0034050563254753178,
+      "pnl_pct": 0.003405065422383735,
       "reason_exit": "hold_complete"
     },
     {
@@ -528,7 +528,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-08",
-      "pnl_pct": 2.0218683263681272e-05,
+      "pnl_pct": 2.0218683263692856e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -538,7 +538,7 @@
       "side": "sell",
       "entry": "2026-01-06",
       "exit": "2026-01-15",
-      "pnl_pct": 6.502588270173244e-06,
+      "pnl_pct": 6.502815928659475e-06,
       "reason_exit": "hold_complete"
     },
     {
@@ -548,7 +548,7 @@
       "side": "sell",
       "entry": "2026-01-16",
       "exit": "2026-01-28",
-      "pnl_pct": 1.8506773417426357e-06,
+      "pnl_pct": 1.8506551579460773e-06,
       "reason_exit": "hold_complete"
     },
     {
@@ -558,7 +558,7 @@
       "side": "sell",
       "entry": "2025-11-21",
       "exit": "2025-12-03",
-      "pnl_pct": 0.012851384889519276,
+      "pnl_pct": 0.012851482827111842,
       "reason_exit": "hold_complete"
     },
     {
@@ -568,7 +568,7 @@
       "side": "sell",
       "entry": "2026-01-14",
       "exit": "2026-01-26",
-      "pnl_pct": 0.0009064238986106712,
+      "pnl_pct": 0.000906423487817389,
       "reason_exit": "hold_complete"
     },
     {
@@ -578,7 +578,7 @@
       "side": "sell",
       "entry": "2026-02-02",
       "exit": "2026-02-11",
-      "pnl_pct": 0.019277954416792368,
+      "pnl_pct": 0.019277879446435234,
       "reason_exit": "hold_complete"
     },
     {
@@ -588,7 +588,7 @@
       "side": "sell",
       "entry": "2026-02-17",
       "exit": "2026-02-26",
-      "pnl_pct": 0.16509857261037675,
+      "pnl_pct": 0.1650987921185011,
       "reason_exit": "hold_complete"
     },
     {
@@ -598,7 +598,7 @@
       "side": "sell",
       "entry": "2026-03-24",
       "exit": "2026-04-02",
-      "pnl_pct": 0.012002247633994313,
+      "pnl_pct": 0.012002143124498973,
       "reason_exit": "hold_complete"
     },
     {
@@ -608,7 +608,7 @@
       "side": "sell",
       "entry": "2025-09-03",
       "exit": "2025-09-04",
-      "pnl_pct": 0.0031823504419627585,
+      "pnl_pct": 0.0031823495221956683,
       "reason_exit": "take_profit"
     },
     {
@@ -648,7 +648,7 @@
       "side": "sell",
       "entry": "2023-10-26",
       "exit": "2023-11-06",
-      "pnl_pct": 0.00011296814385528339,
+      "pnl_pct": 0.00011297179777434855,
       "reason_exit": "hold_complete"
     },
     {
@@ -658,7 +658,7 @@
       "side": "sell",
       "entry": "2024-04-19",
       "exit": "2024-04-30",
-      "pnl_pct": 2.767032555328148e-06,
+      "pnl_pct": 2.766982248805987e-06,
       "reason_exit": "hold_complete"
     },
     {
@@ -668,7 +668,7 @@
       "side": "sell",
       "entry": "2024-08-05",
       "exit": "2024-08-14",
-      "pnl_pct": 0.003847504470362842,
+      "pnl_pct": 0.0038475266611539133,
       "reason_exit": "hold_complete"
     },
     {
@@ -678,7 +678,7 @@
       "side": "sell",
       "entry": "2025-03-10",
       "exit": "2025-03-19",
-      "pnl_pct": 0.002241344057402145,
+      "pnl_pct": 0.0022411369949066557,
       "reason_exit": "hold_complete"
     },
     {
@@ -688,7 +688,7 @@
       "side": "sell",
       "entry": "2025-04-03",
       "exit": "2025-04-14",
-      "pnl_pct": 0.01896119796015962,
+      "pnl_pct": 0.018961490440516888,
       "reason_exit": "hold_complete"
     },
     {
@@ -698,7 +698,7 @@
       "side": "sell",
       "entry": "2026-03-20",
       "exit": "2026-03-31",
-      "pnl_pct": 7.717739969221937e-05,
+      "pnl_pct": 7.718105474240618e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -708,7 +708,7 @@
       "side": "sell",
       "entry": "2023-10-26",
       "exit": "2023-11-06",
-      "pnl_pct": 0.003656448443404903,
+      "pnl_pct": 0.0036563781579423654,
       "reason_exit": "hold_complete"
     },
     {
@@ -718,7 +718,7 @@
       "side": "sell",
       "entry": "2024-04-19",
       "exit": "2024-04-30",
-      "pnl_pct": 0.00042465209256692626,
+      "pnl_pct": 0.00042465533514928085,
       "reason_exit": "hold_complete"
     },
     {
@@ -728,7 +728,7 @@
       "side": "sell",
       "entry": "2025-03-11",
       "exit": "2025-03-20",
-      "pnl_pct": 0.01605320490510789,
+      "pnl_pct": 0.016053096220674256,
       "reason_exit": "hold_complete"
     },
     {
@@ -738,7 +738,7 @@
       "side": "sell",
       "entry": "2025-04-03",
       "exit": "2025-04-14",
-      "pnl_pct": 0.048252135646314476,
+      "pnl_pct": 0.048252228078496405,
       "reason_exit": "hold_complete"
     },
     {
@@ -748,7 +748,7 @@
       "side": "sell",
       "entry": "2026-03-27",
       "exit": "2026-04-08",
-      "pnl_pct": 0.003405056325475494,
+      "pnl_pct": 0.0034050654223842214,
       "reason_exit": "hold_complete"
     },
     {
@@ -758,7 +758,7 @@
       "side": "sell",
       "entry": "2023-10-23",
       "exit": "2023-11-01",
-      "pnl_pct": 0.0039044067361028246,
+      "pnl_pct": 0.003904429244878351,
       "reason_exit": "hold_complete"
     },
     {
@@ -768,7 +768,7 @@
       "side": "sell",
       "entry": "2024-12-19",
       "exit": "2024-12-31",
-      "pnl_pct": 0.007899270361893054,
+      "pnl_pct": 0.007899196527012904,
       "reason_exit": "hold_complete"
     },
     {
@@ -778,7 +778,7 @@
       "side": "sell",
       "entry": "2025-02-27",
       "exit": "2025-03-10",
-      "pnl_pct": -0.015453213933735863,
+      "pnl_pct": -0.015453385761572682,
       "reason_exit": "hold_complete"
     },
     {
@@ -788,7 +788,7 @@
       "side": "sell",
       "entry": "2025-03-11",
       "exit": "2025-03-20",
-      "pnl_pct": 0.003661541105909294,
+      "pnl_pct": 0.0036615077789883886,
       "reason_exit": "hold_complete"
     },
     {
@@ -798,7 +798,7 @@
       "side": "sell",
       "entry": "2026-09-29",
       "exit": "2026-10-08",
-      "pnl_pct": 2.021868326369108e-05,
+      "pnl_pct": 2.0218683263682173e-05,
       "reason_exit": "hold_complete"
     },
     {
@@ -808,7 +808,7 @@
       "side": "sell",
       "entry": "2024-01-04",
       "exit": "2024-01-16",
-      "pnl_pct": 0.001836239272434023,
+      "pnl_pct": 0.0018362241189097913,
       "reason_exit": "hold_complete"
     },
     {
@@ -818,7 +818,7 @@
       "side": "sell",
       "entry": "2024-03-04",
       "exit": "2024-03-13",
-      "pnl_pct": 0.0001769570314815362,
+      "pnl_pct": 0.0001769486035345532,
       "reason_exit": "hold_complete"
     },
     {
@@ -828,7 +828,7 @@
       "side": "sell",
       "entry": "2025-01-21",
       "exit": "2025-01-30",
-      "pnl_pct": 0.023707747677891543,
+      "pnl_pct": 0.023707830571310148,
       "reason_exit": "hold_complete"
     },
     {
@@ -838,7 +838,7 @@
       "side": "sell",
       "entry": "2025-03-14",
       "exit": "2025-03-25",
-      "pnl_pct": 0.03818874677804317,
+      "pnl_pct": 0.03818885542651592,
       "reason_exit": "hold_complete"
     }
   ]
