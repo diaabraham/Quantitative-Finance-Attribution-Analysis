@@ -117,11 +117,35 @@ MPLBACKEND=Agg python scripts/run_multi_horizon_backtest.py \
   --out-json data/cache/multi_horizon_backtest.json
 ```
 
-Unit tests:
+## Test suite
+
+Markers: `live` (network), `slow` (multi-horizon), `options_tape` (Yahoo option chains), `requires_key` (skip unless env key set).
+
+| Tier | Path | What it covers |
+|------|------|----------------|
+| **Unit** | `tests/unit/` | BS, execution, strategies, Brinson, risk, providers (mocked + small live yfinance), options helpers |
+| **Integration** | `tests/integration/test_*.py` (active) | Attribution↔risk paths; strategies on **live** yfinance OHLC/closes |
+| **Live contracts** | `tests/live/` | Provider contracts vs live endpoints; **real** SPY/QQQ/… option bid/ask tape via yfinance |
+| **Regression / gate** | `tests/regression/` | Per-horizon ≥87% win-rate gate on **live** yfinance stocks/futures + modeled options |
 
 ```bash
-pytest tests/unit -q
+# Full suite (yfinance live; keyed providers skip without secrets)
+MPLBACKEND=Agg pytest tests/ -q
+
+# Fast offline-ish unit only (still may include a tiny yfinance probe in older tests)
+pytest tests/unit -q -m 'not live'
+
+# Live providers + option tape + win-rate gate
+MPLBACKEND=Agg pytest tests/live tests/regression tests/integration -q
+
+# Keyed providers (run when keys exist)
+export STOOQ_API_KEY=... POLYGON_API_KEY=... MASSIVE_API_KEY=... DATABENTO_API_KEY=...
+MPLBACKEND=Agg pytest tests/live -q -m 'requires_key'
 ```
+
+**API keys:** copy `.env.example` → `.env`. **yfinance** needs no key (default). **Stooq / Polygon / Massive / Databento** live contract tests are collected always but **skipped** until the matching env var is set. Options: live chain/quotes via `data/options_yfinance.py`; multi-horizon options PnL path remains **modeled** BS credit spreads on real underlyings (isolated from tape tests).
+
+Legacy modules under `tests/integration/test_pipeline.py` (etc.) still import packages not in this repo and stay ignored in `pytest.ini`.
 
 ### Win-rate definition
 
