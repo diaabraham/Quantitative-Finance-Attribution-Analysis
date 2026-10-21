@@ -107,23 +107,36 @@ class RiskManager:
             - 'risk_budgeting': Risk budgeting with custom budgets
         """
         if method == 'risk_parity':
-            return self._risk_parity_weights(returns)
+            base = self._risk_parity_weights(returns)
         elif method == 'min_variance':
-            return self._min_variance_weights(returns)
+            base = self._min_variance_weights(returns)
         elif method == 'max_sharpe':
-            return self._max_sharpe_weights(returns)
+            base = self._max_sharpe_weights(returns)
         elif method == 'equal_risk':
-            return self._equal_risk_weights(returns)
+            base = self._equal_risk_weights(returns)
         elif method == 'black_litterman':
-            return self._black_litterman_weights(returns)
+            base = self._black_litterman_weights(returns)
         elif method == 'hierarchical_risk_parity':
-            return self._hierarchical_risk_parity_weights(returns)
+            base = self._hierarchical_risk_parity_weights(returns)
         elif method == 'mean_variance':
-            return self._mean_variance_weights(returns)
+            base = self._mean_variance_weights(returns)
         elif method == 'risk_budgeting':
-            return self._risk_budgeting_weights(returns)
+            base = self._risk_budgeting_weights(returns)
         else:
             raise ValueError(f"Unknown weighting method: {method}")
+
+        # Optimizers return a static Series; backtests need a timed weight path.
+        # Gate by signals and renormalize each day.
+        if isinstance(base, pd.DataFrame):
+            return base.reindex(index=signals.index).ffill().fillna(0.0)
+
+        base = base.reindex(signals.columns).fillna(0.0)
+        timed = signals.astype(float).mul(base, axis=1)
+        row_sum = timed.sum(axis=1).replace(0, np.nan)
+        timed = timed.div(row_sum, axis=0).fillna(0.0)
+        timed = timed.clip(upper=self.max_position_size)
+        row_sum = timed.sum(axis=1).replace(0, np.nan)
+        return timed.div(row_sum, axis=0).fillna(0.0)
     
     def _risk_parity_weights(self, returns):
         """Calculate risk parity weights"""
@@ -566,22 +579,39 @@ class RiskManager:
         sector_mapping : dict
             Mapping of assets to sectors
         """
+        if isinstance(weights, pd.Series):
+            # Static weights — nothing time-varying to clip
+            return weights
+
         sector_exposure = pd.DataFrame(index=weights.index)
-        
-        # Calculate sector exposures
+
         for sector, assets in sector_mapping.items():
-            sector_exposure[sector] = weights[assets].sum(axis=1)
-            
-        # Check for violations
+            cols = [a for a in assets if a in weights.columns]
+            if not cols:
+                sector_exposure[sector] = 0.0
+            elif len(cols) == 1:
+                sector_exposure[sector] = weights[cols[0]]
+            else:
+                sector_exposure[sector] = weights[cols].sum(axis=1)
+
         violations = sector_exposure > self.max_sector_exposure
-        
+
         if violations.any().any():
             print("Warning: Sector exposure limits exceeded")
-            # Here you would implement logic to adjust weights
-            # This is a simplified version
-            weights = weights * (1 - violations.astype(int))
-            weights = weights.div(weights.sum(axis=1), axis=0)
-            
+            # Scale down offending sector sleeves proportionally
+            adjusted = weights.copy()
+            for sector, assets in sector_mapping.items():
+                cols = [a for a in assets if a in adjusted.columns]
+                if not cols:
+                    continue
+                mask = violations[sector]
+                if not mask.any():
+                    continue
+                scale = (self.max_sector_exposure / sector_exposure.loc[mask, sector]).clip(upper=1.0)
+                adjusted.loc[mask, cols] = adjusted.loc[mask, cols].mul(scale, axis=0)
+            row_sum = adjusted.sum(axis=1).replace(0, np.nan)
+            weights = adjusted.div(row_sum, axis=0).fillna(0.0)
+
         return weights
     
     def check_drawdown_limit(self, portfolio_value):

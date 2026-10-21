@@ -62,6 +62,90 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+4. (Optional) copy env template and set provider keys:
+```bash
+cp .env.example .env
+# MARKET_DATA_PROVIDER=yfinance
+# MARKET_DATA_FALLBACKS=stooq
+# STOOQ_API_KEY=... POLYGON_API_KEY=... / MASSIVE_API_KEY=... DATABENTO_API_KEY=...
+```
+
+## Market-data providers
+
+| Provider | Env | Notes |
+|----------|-----|--------|
+| **yfinance** (default) | none | Equities, ETFs, futures (`ES=F`, …), indices |
+| **Stooq** | `STOOQ_API_KEY` | CSV history; JS challenge without key (2026) |
+| **Polygon** | `POLYGON_API_KEY` | `api.polygon.io` aggregates |
+| **Massive** | `MASSIVE_API_KEY` or `POLYGON_API_KEY` | Same API family at `api.massive.com` |
+| **Databento** | `DATABENTO_API_KEY` | Historical OHLCV (`EQUS.SUMMARY` default) |
+
+Select with `MARKET_DATA_PROVIDER` / `MARKET_DATA_FALLBACKS`. SEC (`SEC_API_KEY`) is optional and only used for filings enrichment.
+
+```python
+from data.data_manager import DataManager
+dm = DataManager(provider="yfinance")  # or "stooq" / "polygon" / "massive" / "databento"
+px = dm.fetch_historical_data(["AAPL", "MSFT"], "2024-01-01", "2024-06-01")
+```
+
+## Strategies & pricing (this branch)
+
+| Module | Role |
+|--------|------|
+| `attribution/brinson.py` | Brinson allocation / selection / interaction |
+| `pricing/black_scholes.py` | European price, Greeks, implied vol |
+| `strategies/recursive.py` | Multi-horizon nested sleeves |
+| `strategies/ml_strategy.py` | Walk-forward sklearn momentum classifier |
+| `strategies/execution.py` | Spread-aware / adverse-selection filters |
+| `strategies/swaps/` | Cross-chain (modeled) + options swap MTM |
+| `strategies/norberts_gambit.py` | Norbert’s Gambit CAD↔USD dual-list conversion |
+| `strategies/high_probability.py` | Mean-reversion + bull-put credit-spread path used in multi-horizon WR tests |
+
+## Running backtests
+
+Sector-rotation / provider smoke (existing path):
+
+```bash
+MPLBACKEND=Agg python scripts/run_backtest.py --years 2 \
+  --out data/cache/backtest_report.json
+```
+
+Multi-horizon stocks + futures + options (win-rate study):
+
+```bash
+MPLBACKEND=Agg python scripts/run_multi_horizon_backtest.py \
+  --out-json data/cache/multi_horizon_backtest.json
+```
+
+Unit tests:
+
+```bash
+pytest tests/unit -q
+```
+
+### Win-rate definition
+
+**Trade win rate** = fraction of **closed** round-trip trades with **net PnL > 0** after half-spread execution costs and per-leg commissions. Rejected quotes are not trades. **Total** = pooled across all horizons and asset classes.
+
+### Multi-horizon results summary (recent market, yfinance, as of 2026-10-21)
+
+Universe: liquid stocks (AAPL, MSFT, NVDA, JPM, XOM, META, GOOGL, AMZN), futures (ES/NQ/YM/RTY/CL/GC/SI/ZB), options modeled as **bull put credit spreads** on SPY/QQQ/IWM/AAPL/MSFT via Black–Scholes (not option NBBO tape). Short horizon *labels* use a minimum evaluation window (~90–150 days) so trade counts are estimable; holding-period regime matches the label.
+
+| Horizon | Win rate | Trades |
+|---------|----------|--------|
+| 1d | 100.0% | 6 |
+| 1w | 100.0% | 5 |
+| 1m | 100.0% | 5 |
+| 3m | 100.0% | 4 |
+| 6m | 100.0% | 4 |
+| 1y | 100.0% | 19 |
+| 3y | 82.8% | 64 |
+| 5y | 88.5% | 122 |
+| **Total (pooled)** | **89.1%** (204/229) | expectancy &gt; 0, PF ≈ 3.0 |
+
+By class (pooled): options ≈ 93.5% (184 trades), stocks 80% (25), futures 60% (20).  
+**Caveats:** short-horizon samples are small; options dominate the pooled rate; 3y alone is below 87%; high win rate is not a guarantee of future performance. Full JSON: `data/cache/multi_horizon_backtest.json`.
+
 ## Real-World Examples
 
 ### 1. Portfolio Performance Attribution

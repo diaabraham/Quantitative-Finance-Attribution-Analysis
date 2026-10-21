@@ -1,6 +1,13 @@
+import os
+
+# Headless-friendly plotting for CI / cloud agents
+if os.environ.get("MPLBACKEND") is None and not os.environ.get("DISPLAY"):
+    import matplotlib
+
+    matplotlib.use("Agg")
+
 import pandas as pd
 import numpy as np
-import yfinance as yf
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, SMAIndicator
 import matplotlib.pyplot as plt

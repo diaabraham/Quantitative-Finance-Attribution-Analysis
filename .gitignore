@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.env
+.idea/
+.DS_Store
+data/raw/
+data/cache/price_data_*.csv
+*.png
+!attribution_breakdown.png
+!factor_contributions.png
+!time_series_attribution.png

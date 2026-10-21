@@ -13,5 +13,10 @@ requests>=2.31.0
 python-dotenv>=1.0.0
 statsmodels>=0.14.0
 
+# Optional market-data SDKs (adapters also work via plain REST where noted)
+massive>=1.0.0
+polygon-api-client>=1.14.0
+databento>=0.40.0
+
 # Dev / tests
 pytest>=8.0.0
