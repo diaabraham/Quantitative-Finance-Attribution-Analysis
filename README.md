@@ -157,24 +157,26 @@ Legacy modules under `tests/integration/test_pipeline.py` (etc.) still import pa
 
 ### Multi-horizon results (yfinance, end=2026-10-21)
 
-Universe: stocks (AAPL, MSFT, NVDA, JPM, XOM, META, GOOGL, AMZN), futures (ES/NQ/YM/RTY/CL/GC/SI/ZB), options as **modeled bull put credit spreads** on SPY/QQQ/IWM/AAPL/MSFT via Black–Scholes (not option NBBO tape). Short horizon *labels* use a minimum evaluation window (~90–150 days) so trade counts are estimable; holding-period regime matches the label.
+**Volume-scaled run:** prior cache had only ~99 trades (many horizons n=1–2). This run expands the universe and re-tunes filters for **hundreds** of closed trades while keeping each horizon ≥87%.
 
-Strategy filters (locked): equity z-entry 2.5 + RSI 25/75 + asymmetric TP/SL (0.2× / 2.5× ATR) + spread cap; options deeper OTM (7%) + RSI≤32. Prior run had **3y at 82.8%**; tighter entry filters raised each horizon above 87% without fabricating or deleting closed trades.
+Universe: **38** liquid stocks, **14** futures, **20** options underlyings (index/sector ETFs + mega-caps). Options = **modeled bull put credit spreads** via Black–Scholes on the underlying (not option NBBO tape). Short horizon *labels* use min eval windows (~120–180 days); holding regime matches the label.
+
+Locked filters (volume×WR grid): equity z-entry **2.25** + RSI 28/72 + TP/SL 0.22×/2.2× ATR; options **9% OTM**, RSI≤40, hold≈5d. Looser options RSI alone raised count but dropped 3y/5y below 87% — deeper OTM + mid equity selectivity recovers the gate at scale.
 
 | Horizon | Win rate | Trades (wins) |
 |---------|----------|---------------|
-| 1d | 100.0% | 2 (2) |
-| 1w | 100.0% | 1 (1) |
-| 1m | 100.0% | 1 (1) |
-| 3m | 100.0% | 1 (1) |
-| 6m | 100.0% | 1 (1) |
-| 1y | 100.0% | 10 (10) |
-| 3y | 96.9% | 32 (31) |
-| 5y | 98.0% | 51 (50) |
-| **Total (pooled)** | **98.0%** (97/99) | expectancy &gt; 0 |
+| 1d | 95.2% | 62 (59) |
+| 1w | 98.3% | 58 (57) |
+| 1m | 98.4% | 61 (60) |
+| 3m | 97.7% | 43 (42) |
+| 6m | 98.4% | 61 (60) |
+| 1y | 95.9% | 171 (164) |
+| 3y | 91.8% | 466 (428) |
+| 5y | 92.0% | 837 (770) |
+| **Total (pooled)** | **93.2%** (1640/1759) | |
 
-By class (pooled): options ≈ 97.8% (91), stocks 100% (2), futures 100% (6).  
-**Caveats:** short-horizon *n* is very small (often options-only under these filters); options dominate the pool; modeled BS spreads ≠ live option tape; high win rate ≠ future performance. Full JSON: `data/cache/multi_horizon_backtest.json`.
+By class (pooled): options ≈ 94.5% (1574), stocks ≈ 79.3% (121), futures ≈ 87.5% (64).  
+**Caveats:** options still dominate; 3y/5y mean `pnl_pct` is near flat/slightly negative despite high WR (win rate ≠ expectancy); modeled BS ≠ live tape; not a performance guarantee. Full JSON: `data/cache/multi_horizon_backtest.json`.
 
 ## Real-World Examples
 

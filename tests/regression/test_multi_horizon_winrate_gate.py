@@ -27,7 +27,8 @@ from scripts.run_multi_horizon_backtest import (
 from strategies.high_probability import summarize_trades
 
 TARGET = 0.87
-MIN_TRADES_TOTAL = 40
+MIN_TRADES_TOTAL = 300
+MIN_TRADES_MAJOR = 100  # 1y / 3y / 5y where history allows
 CACHE = Path(__file__).resolve().parents[2] / "data" / "cache" / "multi_horizon_backtest.json"
 
 
@@ -79,7 +80,9 @@ def test_each_horizon_meets_win_rate_target(live_backtest):
             f"(n={meta['n_trades']})"
         )
     total = live_backtest["total"]
-    assert total.n_trades >= MIN_TRADES_TOTAL
+    assert total.n_trades >= MIN_TRADES_TOTAL, (
+        f"expected hundreds of pooled trades, got {total.n_trades}"
+    )
     assert total.win_rate >= TARGET
 
 
@@ -92,7 +95,9 @@ def test_horizon_breakdown_and_threshold(live_backtest, horizon):
     for cls in ("stocks", "futures", "options"):
         assert cls in meta["by_asset_class"]
     assert meta["win_rate"] >= TARGET
-    if horizon in ("3y", "5y"):
+    assert meta["n_trades"] >= 20, f"{horizon}: too few trades ({meta['n_trades']})"
+    if horizon in ("1y", "3y", "5y"):
+        assert meta["n_trades"] >= MIN_TRADES_MAJOR
         assert meta["by_asset_class"]["options"]["n_trades"] >= 1
 
 
