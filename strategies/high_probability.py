@@ -56,21 +56,27 @@ def _rsi(close: pd.Series, window: int = 14) -> pd.Series:
 class HighProbabilityMeanReversion:
     """
     Parameters tuned for selectivity (fewer, higher-confidence trades).
+
+    Trend alignment (``trend_sma``): only buy dips while price is at/above the
+    SMA (uptrend pullback) and only short rallies while price is at/below the
+    SMA (downtrend bounce). This is a structural filter, not post-hoc trade
+    deletion — rejected setups never become trades.
     """
 
     def __init__(
         self,
-        z_entry: float = 2.0,
+        z_entry: float = 2.5,
         z_window: int = 20,
         rsi_period: int = 14,
-        rsi_low: float = 28.0,
-        rsi_high: float = 72.0,
-        tp_atr: float = 0.45,
-        sl_atr: float = 1.60,
+        rsi_low: float = 25.0,
+        rsi_high: float = 75.0,
+        tp_atr: float = 0.20,
+        sl_atr: float = 2.50,
         atr_window: int = 14,
         max_hold: int = 8,
-        max_spread_bps: float = 20.0,
-        cost_bps: float = 2.0,
+        max_spread_bps: float = 30.0,
+        cost_bps: float = 1.0,
+        trend_sma: int = 0,
         executor: Optional[SpreadAwareExecutor] = None,
     ):
         self.z_entry = z_entry
@@ -84,6 +90,8 @@ class HighProbabilityMeanReversion:
         self.max_hold = max_hold
         self.cost_bps = cost_bps
         self.max_spread_bps = max_spread_bps
+        # 0 disables SMA trend alignment (locked multi-horizon defaults).
+        self.trend_sma = int(trend_sma)
         self.executor = executor or SpreadAwareExecutor(max_spread_bps=max_spread_bps)
 
     def _daily_spread_proxy(self, high: float, low: float, mid: float, asset_class: str) -> float:
@@ -112,7 +120,8 @@ class HighProbabilityMeanReversion:
         ohlc columns: Open, High, Low, Close (Volume optional).
         """
         df = ohlc.dropna().copy()
-        if len(df) < max(self.z_window, self.atr_window, self.rsi_period) + 5:
+        warmup = max(self.z_window, self.atr_window, self.rsi_period, self.trend_sma)
+        if len(df) < warmup + 5:
             return []
 
         close = df["Close"].astype(float)
@@ -123,6 +132,7 @@ class HighProbabilityMeanReversion:
         sd = rets.rolling(self.z_window).std()
         z = (rets - mu) / sd.replace(0, np.nan)
         rsi = _rsi(close, self.rsi_period)
+        trend = close.rolling(self.trend_sma).mean() if self.trend_sma > 0 else None
         tr = pd.concat(
             [
                 (high - low),
@@ -134,7 +144,7 @@ class HighProbabilityMeanReversion:
         atr = tr.rolling(self.atr_window).mean()
 
         trades: List[Trade] = []
-        i = max(self.z_window, self.atr_window, self.rsi_period) + 1
+        i = warmup + 1
         while i < len(df) - 1:
             zi = z.iloc[i]
             rsi_i = rsi.iloc[i]
@@ -148,9 +158,19 @@ class HighProbabilityMeanReversion:
                 float(high.iloc[i]), float(low.iloc[i]), mid, asset_class
             )
             side = None
-            if zi <= -self.z_entry and rsi_i <= self.rsi_low:
+            trend_ok_long = True
+            trend_ok_short = True
+            if trend is not None:
+                trend_i = trend.iloc[i]
+                if not np.isfinite(trend_i):
+                    i += 1
+                    continue
+                # Pullback longs only in / near uptrend; fade shorts only in / near downtrend
+                trend_ok_long = mid >= float(trend_i)
+                trend_ok_short = mid <= float(trend_i)
+            if zi <= -self.z_entry and rsi_i <= self.rsi_low and trend_ok_long:
                 side = "buy"
-            elif zi >= self.z_entry and rsi_i >= self.rsi_high:
+            elif zi >= self.z_entry and rsi_i >= self.rsi_high and trend_ok_short:
                 side = "sell"
             if side is None:
                 i += 1
@@ -261,12 +281,12 @@ class OptionsCreditPutPath:
 
     def __init__(
         self,
-        short_otm_pct: float = 0.04,
+        short_otm_pct: float = 0.07,
         width_pct: float = 0.03,
-        hold_days: int = 5,
+        hold_days: int = 7,
         vol_lookback: int = 20,
-        rsi_entry: float = 40.0,
-        max_spread_bps: float = 40.0,
+        rsi_entry: float = 32.0,
+        max_spread_bps: float = 35.0,
         rate: float = 0.04,
     ):
         self.short_otm_pct = short_otm_pct

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T15:41:10.208819Z",
+  "generated_at": "2026-10-21T16:29:31.722800Z",
   "start": "2024-10-21",
   "end": "2026-10-21",
   "provider_requested": "yfinance",
@@ -16,7 +16,7 @@
     "stooq": {
       "status": "error",
       "rows": 0,
-      "error": "No price data retrieved from Stooq for symbols: XLK, XLF (XLK: Stooq failed for xlk.us: HTTP 404: <meta charset=utf-8><title>Stooq</title><center style=font-family:arial;margin-top:50px><p><a href=/><img src=//static.stooq.com/stooq.svg height=68></a><p style=font-size:x-large>The page you request; "
+      "error": "Stooq returned a browser/JS challenge. Set STOOQ_API_KEY from https://stooq.com/q/d/?s=aapl.us&get_apikey"
     },
     "polygon": {
       "status": "skipped_no_key",
@@ -52,37 +52,37 @@
     "end": "2026-10-20",
     "methods": {
       "risk_parity": {
-        "final_value": 100378.65282535873,
-        "total_return": 0.0037865282535873845,
-        "ann_vol": 0.1393063692352224,
-        "sharpe": 0.08333059706955434,
+        "final_value": 92289.0774093706,
+        "total_return": -0.07710922590629399,
+        "ann_vol": 0.14486521104046712,
+        "sharpe": -0.2060903365314229,
         "spread_rejected_mean": 0.02441783100465736
       },
       "equal_risk": {
-        "final_value": 92617.5540274033,
-        "total_return": -0.07382445972596707,
-        "ann_vol": 0.12068249648862393,
-        "sharpe": -0.2592637363373183,
+        "final_value": 92617.56588666353,
+        "total_return": -0.07382434113336467,
+        "ann_vol": 0.12068255864923474,
+        "sharpe": -0.25926300664685925,
         "spread_rejected_mean": 0.02441783100465736
       }
     },
     "brinson": {
-      "allocation": -0.020907987800946746,
+      "allocation": -0.02090798780094673,
       "selection": 0.0,
       "interaction": 0.0,
-      "total": -0.020907987800946746
+      "total": -0.020907987800946725
     },
     "provider": "yfinance+stooq"
   },
   "strategies": {
     "recursive": {
-      "final_growth": 1.5599004380350174,
-      "sharpe": 1.691687242834369,
+      "final_growth": 1.5599003515334444,
+      "sharpe": 1.6916869981906835,
       "avg_names": 7.317365269461078
     },
     "ml": {
-      "final_growth": 1.0335563749635386,
-      "sharpe": 0.2596934032768561,
+      "final_growth": 1.0335561710882688,
+      "sharpe": 0.25969222656910046,
       "avg_names": 2.625
     }
   },
@@ -98,10 +98,10 @@
     "norberts_gambit": {
       "aborted": false,
       "reason": "",
-      "usd_received": 7279.891019632372,
-      "savings_vs_retail": -16.40527666392427,
+      "usd_received": 7279.89052774738,
+      "savings_vs_retail": -16.405768548916967,
       "schedule_rows": 12,
-      "schedule_savings_mean": 161.01331744386485
+      "schedule_savings_mean": 161.01348444794826
     },
     "cross_chain": {
       "rows": 60,
@@ -110,7 +110,7 @@
     },
     "options_swap": {
       "rows": 60,
-      "final_mtm": -17.423871108247944,
+      "final_mtm": -17.423848414106796,
       "reject_rate": 0.0
     }
   },
